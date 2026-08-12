@@ -1,9 +1,11 @@
 package com.biblioteca.catalog_service.controller;
 
-import com.biblioteca.catalog_service.model.Libro;
+import com.biblioteca.catalog_service.dto.LibroRequest;
+import com.biblioteca.catalog_service.dto.LibroResponse;
 import com.biblioteca.catalog_service.service.LibroService;
-import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,25 +20,24 @@ public class LibroController {
     }
 
     @GetMapping
-    public List<Libro> listarLibros() {
+    public List<LibroResponse> listarLibros() {
         return libroService.listarTodos();
     }
 
-    @PostMapping
-    public Libro crearLibro(@RequestBody Libro libro) {
-        return libroService.guardar(libro);
+    @GetMapping("/{id}")
+    public LibroResponse obtenerLibro(@PathVariable Long id) {
+        return libroService.buscarPorId(id);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Libro> obtenerLibro(@PathVariable Long id) {
-        return libroService.buscarPorId(id)
-                .map(libro -> ResponseEntity.ok(libro))
-                .orElse(ResponseEntity.notFound().build());
+    @PostMapping
+    public ResponseEntity<LibroResponse> crearLibro(@Valid @RequestBody LibroRequest request) {
+        LibroResponse creado = libroService.guardar(request);
+        return ResponseEntity.status(201).body(creado);
     }
 
     @PutMapping("/{id}")
-    public Libro actualizarLibro(@PathVariable Long id, @RequestBody Libro libro) {
-        return libroService.actualizar(id, libro);
+    public LibroResponse actualizarLibro(@PathVariable Long id, @Valid @RequestBody LibroRequest request) {
+        return libroService.actualizar(id, request);
     }
 
     @DeleteMapping("/{id}")
