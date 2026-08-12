@@ -5,6 +5,7 @@ import com.biblioteca.catalog_service.dto.LibroResponse;
 import com.biblioteca.catalog_service.model.Libro;
 import com.biblioteca.catalog_service.repository.LibroRepository;
 import org.springframework.stereotype.Service;
+import com.biblioteca.catalog_service.exception.RecursoNoEncontradoException;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class LibroService {
 
     public LibroResponse buscarPorId(Long id) {
         Libro libro = libroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Libro no encontrado con id: " + id));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con id: " + id));
         return aResponse(libro);
     }
 
@@ -38,7 +39,7 @@ public class LibroService {
 
     public LibroResponse actualizar(Long id, LibroRequest request) {
         Libro libro = libroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Libro no encontrado con id: " + id));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con id: " + id));
 
         libro.setTitulo(request.getTitulo());
         libro.setAutor(request.getAutor());
