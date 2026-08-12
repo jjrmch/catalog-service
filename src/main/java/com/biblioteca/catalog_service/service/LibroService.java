@@ -1,11 +1,12 @@
 package com.biblioteca.catalog_service.service;
 
+import com.biblioteca.catalog_service.dto.LibroRequest;
+import com.biblioteca.catalog_service.dto.LibroResponse;
 import com.biblioteca.catalog_service.model.Libro;
 import com.biblioteca.catalog_service.repository.LibroRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LibroService {
@@ -16,32 +17,61 @@ public class LibroService {
         this.libroRepository = libroRepository;
     }
 
-    public List<Libro> listarTodos() {
-        return libroRepository.findAll();
+    public List<LibroResponse> listarTodos() {
+        return libroRepository.findAll()
+                .stream()
+                .map(libro -> aResponse(libro))
+                .toList();
     }
 
-    public Libro guardar(Libro libro) {
-        return libroRepository.save(libro);
+    public LibroResponse buscarPorId(Long id) {
+        Libro libro = libroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Libro no encontrado con id: " + id));
+        return aResponse(libro);
     }
 
-    public Optional<Libro> buscarPorId(Long id) {
-        return libroRepository.findById(id);
+    public LibroResponse guardar(LibroRequest request) {
+        Libro libro = aEntidad(request);
+        Libro guardado = libroRepository.save(libro);
+        return aResponse(guardado);
     }
 
-    public Libro actualizar(Long id, Libro datosNuevos) {
+    public LibroResponse actualizar(Long id, LibroRequest request) {
         Libro libro = libroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Libro no encontrado con id: " + id));
 
-        libro.setTitulo(datosNuevos.getTitulo());
-        libro.setAutor(datosNuevos.getAutor());
-        libro.setIsbn(datosNuevos.getIsbn());
-        libro.setPrecio(datosNuevos.getPrecio());
-        libro.setStock(datosNuevos.getStock());
+        libro.setTitulo(request.getTitulo());
+        libro.setAutor(request.getAutor());
+        libro.setIsbn(request.getIsbn());
+        libro.setPrecio(request.getPrecio());
+        libro.setStock(request.getStock());
 
-        return libroRepository.save(libro);
+        return aResponse(libroRepository.save(libro));
     }
 
     public void eliminar(Long id) {
         libroRepository.deleteById(id);
+    }
+
+
+    private LibroResponse aResponse(Libro libro) {
+        return new LibroResponse(
+                libro.getId(),
+                libro.getTitulo(),
+                libro.getAutor(),
+                libro.getIsbn(),
+                libro.getPrecio(),
+                libro.getStock()
+        );
+    }
+
+    private Libro aEntidad(LibroRequest request) {
+        Libro libro = new Libro();
+        libro.setTitulo(request.getTitulo());
+        libro.setAutor(request.getAutor());
+        libro.setIsbn(request.getIsbn());
+        libro.setPrecio(request.getPrecio());
+        libro.setStock(request.getStock());
+        return libro;
     }
 }
