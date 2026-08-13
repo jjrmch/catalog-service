@@ -1,5 +1,6 @@
 package com.biblioteca.catalog_service.controller;
 
+import com.biblioteca.catalog_service.dto.AjusteStockRequest;
 import com.biblioteca.catalog_service.dto.LibroRequest;
 import com.biblioteca.catalog_service.dto.LibroResponse;
 import com.biblioteca.catalog_service.service.LibroService;
@@ -44,5 +45,11 @@ public class LibroController {
     public ResponseEntity<Void> eliminarLibro(@PathVariable Long id) {
         libroService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/stock")
+    public LibroResponse ajustarStock(@PathVariable Long id,
+                                      @Valid @RequestBody AjusteStockRequest request) {
+        return libroService.ajustarStock(id, request.getCantidad());
     }
 }
