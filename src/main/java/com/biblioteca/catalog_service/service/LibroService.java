@@ -5,7 +5,10 @@ import com.biblioteca.catalog_service.dto.LibroResponse;
 import com.biblioteca.catalog_service.model.Libro;
 import com.biblioteca.catalog_service.repository.LibroRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.biblioteca.catalog_service.exception.RecursoNoEncontradoException;
+import com.biblioteca.catalog_service.exception.StockInsuficienteException;
 
 import java.util.List;
 
@@ -23,6 +26,24 @@ public class LibroService {
                 .stream()
                 .map(libro -> aResponse(libro))
                 .toList();
+    }
+
+    @Transactional
+    public LibroResponse ajustarStock(Long id, Integer cantidad) {
+        Libro libro = libroRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Libro no encontrado con id: " + id));
+
+        int nuevoStock = libro.getStock() + cantidad;
+
+        if (nuevoStock < 0) {
+            throw new StockInsuficienteException(
+                    "Stock insuficiente. Disponible: " + libro.getStock()
+                    + ", solicitado: " + Math.abs(cantidad));
+        }
+
+        libro.setStock(nuevoStock);
+        return aResponse(libroRepository.save(libro));
     }
 
     public LibroResponse buscarPorId(Long id) {
