@@ -72,6 +72,9 @@ public class LibroService {
     }
 
     public void eliminar(Long id) {
+        if (!libroRepository.existsById(id)) {
+            throw new RecursoNoEncontradoException("Libro no encontrado con id: " + id);
+        }
         libroRepository.deleteById(id);
     }
 
