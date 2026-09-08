@@ -28,6 +28,17 @@ public class LibroService {
                 .toList();
     }
 
+    public List<LibroResponse> listarPorBusqueda(String q) {
+        if (q == null || q.isBlank()) {
+            return List.of();
+        }
+        return libroRepository
+                .findByTituloContainingIgnoreCaseOrAutorContainingIgnoreCaseOrIsbnContainingIgnoreCase(q, q, q)
+                .stream()
+                .map(libro -> aResponse(libro))
+                .toList();
+    }
+
     @Transactional
     public LibroResponse ajustarStock(Long id, Integer cantidad) {
         Libro libro = libroRepository.findById(id)

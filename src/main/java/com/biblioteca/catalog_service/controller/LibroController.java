@@ -25,6 +25,11 @@ public class LibroController {
         return libroService.listarTodos();
     }
 
+    @GetMapping("/buscar")
+    public List<LibroResponse> buscarLibros(@RequestParam String q) {
+        return libroService.listarPorBusqueda(q);
+    }
+
     @GetMapping("/{id}")
     public LibroResponse obtenerLibro(@PathVariable Long id) {
         return libroService.buscarPorId(id);
