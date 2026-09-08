@@ -1,6 +1,7 @@
 package com.biblioteca.catalog_service.controller;
 
 import com.biblioteca.catalog_service.dto.AjusteStockRequest;
+import com.biblioteca.catalog_service.dto.EstadisticasResponse;
 import com.biblioteca.catalog_service.dto.LibroRequest;
 import com.biblioteca.catalog_service.dto.LibroResponse;
 import com.biblioteca.catalog_service.service.LibroService;
@@ -33,6 +34,11 @@ public class LibroController {
     @GetMapping("/isbn/{isbn}")
     public LibroResponse obtenerLibroPorIsbn(@PathVariable String isbn) {
         return libroService.buscarPorIsbn(isbn);
+    }
+
+    @GetMapping("/estadisticas")
+    public EstadisticasResponse obtenerEstadisticas() {
+        return libroService.estadisticas();
     }
 
     @GetMapping("/{id}")

@@ -2,6 +2,7 @@ package com.biblioteca.catalog_service.service;
 
 import com.biblioteca.catalog_service.dto.LibroRequest;
 import com.biblioteca.catalog_service.dto.LibroResponse;
+import com.biblioteca.catalog_service.dto.EstadisticasResponse;
 import com.biblioteca.catalog_service.model.Libro;
 import com.biblioteca.catalog_service.repository.LibroRepository;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,13 @@ public class LibroService {
             throw new RecursoNoEncontradoException("Libro no encontrado con id: " + id);
         }
         libroRepository.deleteById(id);
+    }
+
+    public EstadisticasResponse estadisticas() {
+        Long totalLibros = libroRepository.count();
+        Long totalEjemplares = libroRepository.sumarStock();
+        Long librosAgotados = libroRepository.countByStock(0);
+        return new EstadisticasResponse(totalLibros, totalEjemplares, librosAgotados);
     }
 
 
