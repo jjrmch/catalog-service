@@ -30,6 +30,11 @@ public class LibroController {
         return libroService.listarPorBusqueda(q);
     }
 
+    @GetMapping("/isbn/{isbn}")
+    public LibroResponse obtenerLibroPorIsbn(@PathVariable String isbn) {
+        return libroService.buscarPorIsbn(isbn);
+    }
+
     @GetMapping("/{id}")
     public LibroResponse obtenerLibro(@PathVariable Long id) {
         return libroService.buscarPorId(id);

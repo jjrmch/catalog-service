@@ -63,6 +63,12 @@ public class LibroService {
         return aResponse(libro);
     }
 
+    public LibroResponse buscarPorIsbn(String isbn) {
+        Libro libro = libroRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con ISBN: " + isbn));
+        return aResponse(libro);
+    }
+
     public LibroResponse guardar(LibroRequest request) {
         Libro libro = aEntidad(request);
         Libro guardado = libroRepository.save(libro);
