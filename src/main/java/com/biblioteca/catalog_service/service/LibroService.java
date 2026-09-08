@@ -2,6 +2,7 @@ package com.biblioteca.catalog_service.service;
 
 import com.biblioteca.catalog_service.dto.LibroRequest;
 import com.biblioteca.catalog_service.dto.LibroResponse;
+import com.biblioteca.catalog_service.dto.EstadisticasResponse;
 import com.biblioteca.catalog_service.model.Libro;
 import com.biblioteca.catalog_service.repository.LibroRepository;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,17 @@ public class LibroService {
 
     public List<LibroResponse> listarTodos() {
         return libroRepository.findAll()
+                .stream()
+                .map(libro -> aResponse(libro))
+                .toList();
+    }
+
+    public List<LibroResponse> listarPorBusqueda(String q) {
+        if (q == null || q.isBlank()) {
+            return List.of();
+        }
+        return libroRepository
+                .findByTituloContainingIgnoreCaseOrAutorContainingIgnoreCaseOrIsbnContainingIgnoreCase(q, q, q)
                 .stream()
                 .map(libro -> aResponse(libro))
                 .toList();
@@ -52,6 +64,12 @@ public class LibroService {
         return aResponse(libro);
     }
 
+    public LibroResponse buscarPorIsbn(String isbn) {
+        Libro libro = libroRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con ISBN: " + isbn));
+        return aResponse(libro);
+    }
+
     public LibroResponse guardar(LibroRequest request) {
         Libro libro = aEntidad(request);
         Libro guardado = libroRepository.save(libro);
@@ -76,6 +94,13 @@ public class LibroService {
             throw new RecursoNoEncontradoException("Libro no encontrado con id: " + id);
         }
         libroRepository.deleteById(id);
+    }
+
+    public EstadisticasResponse estadisticas() {
+        Long totalLibros = libroRepository.count();
+        Long totalEjemplares = libroRepository.sumarStock();
+        Long librosAgotados = libroRepository.countByStock(0);
+        return new EstadisticasResponse(totalLibros, totalEjemplares, librosAgotados);
     }
 
 
