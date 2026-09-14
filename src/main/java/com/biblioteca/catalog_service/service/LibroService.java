@@ -42,20 +42,22 @@ public class LibroService {
 
     @Transactional
     public LibroResponse ajustarStock(Long id, Integer cantidad) {
-        Libro libro = libroRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "Libro no encontrado con id: " + id));
+        // UPDATE atómico en BD: solo descuenta si el stock resultante no es negativo,
+        // evitando la sobreventa con peticiones concurrentes (read-modify-write sin lock).
+        int filasAfectadas = libroRepository.ajustarStock(id, cantidad);
 
-        int nuevoStock = libro.getStock() + cantidad;
-
-        if (nuevoStock < 0) {
+        if (filasAfectadas == 0) {
+            Libro libro = libroRepository.findById(id)
+                    .orElseThrow(() -> new RecursoNoEncontradoException(
+                            "Libro no encontrado con id: " + id));
             throw new StockInsuficienteException(
                     "Stock insuficiente. Disponible: " + libro.getStock()
                     + ", solicitado: " + Math.abs(cantidad));
         }
 
-        libro.setStock(nuevoStock);
-        return aResponse(libroRepository.save(libro));
+        return aResponse(libroRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Libro no encontrado con id: " + id)));
     }
 
     public LibroResponse buscarPorId(Long id) {
