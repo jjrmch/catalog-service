@@ -2,6 +2,7 @@ package com.biblioteca.catalog_service.service;
 
 import com.biblioteca.catalog_service.dto.LibroRequest;
 import com.biblioteca.catalog_service.dto.LibroResponse;
+import com.biblioteca.catalog_service.dto.EstadisticasResponse;
 import com.biblioteca.catalog_service.model.Libro;
 import com.biblioteca.catalog_service.repository.LibroRepository;
 import org.springframework.stereotype.Service;
@@ -28,27 +29,46 @@ public class LibroService {
                 .toList();
     }
 
+    public List<LibroResponse> listarPorBusqueda(String q) {
+        if (q == null || q.isBlank()) {
+            return List.of();
+        }
+        return libroRepository
+                .findByTituloContainingIgnoreCaseOrAutorContainingIgnoreCaseOrIsbnContainingIgnoreCase(q, q, q)
+                .stream()
+                .map(libro -> aResponse(libro))
+                .toList();
+    }
+
     @Transactional
     public LibroResponse ajustarStock(Long id, Integer cantidad) {
-        Libro libro = libroRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "Libro no encontrado con id: " + id));
+        // UPDATE atómico en BD: solo descuenta si el stock resultante no es negativo,
+        // evitando la sobreventa con peticiones concurrentes (read-modify-write sin lock).
+        int filasAfectadas = libroRepository.ajustarStock(id, cantidad);
 
-        int nuevoStock = libro.getStock() + cantidad;
-
-        if (nuevoStock < 0) {
+        if (filasAfectadas == 0) {
+            Libro libro = libroRepository.findById(id)
+                    .orElseThrow(() -> new RecursoNoEncontradoException(
+                            "Libro no encontrado con id: " + id));
             throw new StockInsuficienteException(
                     "Stock insuficiente. Disponible: " + libro.getStock()
                     + ", solicitado: " + Math.abs(cantidad));
         }
 
-        libro.setStock(nuevoStock);
-        return aResponse(libroRepository.save(libro));
+        return aResponse(libroRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Libro no encontrado con id: " + id)));
     }
 
     public LibroResponse buscarPorId(Long id) {
         Libro libro = libroRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con id: " + id));
+        return aResponse(libro);
+    }
+
+    public LibroResponse buscarPorIsbn(String isbn) {
+        Libro libro = libroRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con ISBN: " + isbn));
         return aResponse(libro);
     }
 
@@ -76,6 +96,13 @@ public class LibroService {
             throw new RecursoNoEncontradoException("Libro no encontrado con id: " + id);
         }
         libroRepository.deleteById(id);
+    }
+
+    public EstadisticasResponse estadisticas() {
+        Long totalLibros = libroRepository.count();
+        Long totalEjemplares = libroRepository.sumarStock();
+        Long librosAgotados = libroRepository.countByStock(0);
+        return new EstadisticasResponse(totalLibros, totalEjemplares, librosAgotados);
     }
 
 
