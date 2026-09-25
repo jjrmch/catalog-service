@@ -70,11 +70,17 @@ La plataforma completa se compone de:
 - [biblioteca-frontend](https://github.com/jjrmch/biblioteca-frontend) — panel web en React
 - [biblioteca-deploy](https://github.com/jjrmch/biblioteca-deploy) — docker-compose con el stack completo
 
+## Tests
+
+```bash
+./mvnw verify
+```
+
+22 tests: unitarios del servicio (Mockito), integración de la seguridad por rol (`@SpringBootTest` + MockMvc + Testcontainers) y un test de **concurrencia** que lanza 20 hilos contra el mismo libro para comprobar que el stock nunca queda negativo. Necesita Docker en marcha y se ejecutan también en CI (badge arriba).
+
 ## Por mejorar
 
-- No hay tests de negocio todavía, solo el test de contexto de Spring.
 - El listado de libros no tiene paginación.
-- Las llamadas entre microservicios (transactions-service → catalog-service) todavía no propagan el token; cuando transactions valide JWT habrá que añadir un interceptor de Feign.
 
 ## Licencia
 
