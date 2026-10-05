@@ -1,6 +1,7 @@
 # Catalog Service
 
 ![CI](https://github.com/jjrmch/catalog-service/actions/workflows/ci.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Microservicio de catálogo de la plataforma de gestión de biblioteca. Se encarga del CRUD de libros y del control de stock. Es una de las piezas de un ecosistema de microservicios con Spring Cloud: se registra en Eureka y lo consumen otros servicios (por ejemplo, transactions-service lo llama para descontar stock al registrar una venta o un alquiler).
 
