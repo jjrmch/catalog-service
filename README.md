@@ -77,7 +77,7 @@ La plataforma completa se compone de:
 ./mvnw verify
 ```
 
-22 tests: unitarios del servicio (Mockito), integración de la seguridad por rol (`@SpringBootTest` + MockMvc + Testcontainers) y un test de **concurrencia** que lanza 20 hilos contra el mismo libro para comprobar que el stock nunca queda negativo. Necesita Docker en marcha y se ejecutan también en CI (badge arriba).
+37 tests: unitarios del servicio (Mockito), integración del CRUD y de la seguridad por rol (`@SpringBootTest` + MockMvc + Testcontainers) y un test de **concurrencia** que lanza 20 hilos contra el mismo libro para comprobar que el stock nunca queda negativo. Necesita Docker en marcha y se ejecutan también en CI (badge arriba).
 
 ## Por mejorar
 
